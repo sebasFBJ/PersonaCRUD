@@ -1,5 +1,4 @@
 using Microsoft.Data.Sqlite;
-using System.Data;
 
 namespace PersonasCRUD.Infrastructure.Persistence;
 
@@ -12,8 +11,10 @@ public class SqliteConnectionFactory
         _connectionString = connectionString;
     }
 
-    public IDbConnection CreateConnection()
+    // Devuelve la implementación concreta de Sqlite
+    public SqliteConnection CreateConnection()
     {
         return new SqliteConnection(_connectionString);
     }
 }
+
