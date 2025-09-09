@@ -2,7 +2,7 @@
 using PersonasCRUD.Application.Services;
 using PersonasCRUD.Infrastructure.Persistence;
 using PersonasCRUD.Domain.Interfaces;              // <-- agrega este
-using PersonasCRUD.Infrastructure.Persistence; 
+
 
 // 1. Configurar DI (Dependency Injection)
 var services = new ServiceCollection();
@@ -16,6 +16,7 @@ services.AddScoped<IPersonaRepository, PersonaRepository>();
 // Servicio
 services.AddScoped<PersonaService>();
 
+// creacion de contenedor de servicios
 var serviceProvider = services.BuildServiceProvider();
 
 // 2. Inicializar la BD (crear tabla si no existe)
