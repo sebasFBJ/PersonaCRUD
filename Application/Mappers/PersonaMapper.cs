@@ -8,6 +8,7 @@ public static class PersonaMapper
     {
         return new Persona
         {
+            Id = dto.Id,
             Nombre = dto.Nombre,
             Apellido = dto.Apellido,
             TipoPersona = (TipoPersona)dto.TipoPersona,

@@ -2,6 +2,7 @@ using Microsoft.Data.Sqlite;
 using PersonasCRUD.Domain.Entities;
 using PersonasCRUD.Domain.Interfaces;
 using System.Data;
+using PersonasCRUD.Domain.Enums;
 
 namespace PersonasCRUD.Infrastructure.Persistence;
 
@@ -26,8 +27,16 @@ public class PersonaRepository : IPersonaRepository
         await conn.OpenAsync();
 
         var cmd = conn.CreateCommand();
-        cmd.CommandText = "INSERT INTO Personas (Nombre, FechaNacimiento) VALUES (@nombre, @fecha)";
+        cmd.CommandText = @"
+        INSERT INTO Personas (Nombre, Apellido, TipoPersona, Telefono, Email, FechaNacimiento)
+        VALUES (@nombre, @apellido, @tipoPersona, @telefono, @email, @fecha);
+    ";
+
         cmd.Parameters.AddWithValue("@nombre", persona.Nombre);
+        cmd.Parameters.AddWithValue("@apellido", persona.Apellido);
+        cmd.Parameters.AddWithValue("@tipoPersona", (int)persona.TipoPersona);
+        cmd.Parameters.AddWithValue("@telefono", persona.Telefono);
+        cmd.Parameters.AddWithValue("@email", persona.Email);
         cmd.Parameters.AddWithValue("@fecha", persona.FechaNacimiento.ToString("yyyy-MM-dd"));
 
         await cmd.ExecuteNonQueryAsync();
@@ -38,6 +47,7 @@ public class PersonaRepository : IPersonaRepository
 
         return persona;
     }
+
 
     
     /**
@@ -67,7 +77,7 @@ public class PersonaRepository : IPersonaRepository
         await conn.OpenAsync();
 
         var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT Id, Nombre, FechaNacimiento FROM Personas";
+        cmd.CommandText = "SELECT Id, Nombre, Apellido, TipoPersona, Telefono, Email,  FechaNacimiento FROM Personas";
 
         using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -76,7 +86,11 @@ public class PersonaRepository : IPersonaRepository
             {
                 Id = reader.GetInt32(0),
                 Nombre = reader.GetString(1),
-                FechaNacimiento = DateTime.Parse(reader.GetString(2))
+                Apellido = reader.GetString(2),
+                TipoPersona = (TipoPersona)reader.GetInt32(3),
+                Telefono = reader.GetString(4),
+                Email = reader.GetString(5),
+                FechaNacimiento = DateTime.Parse(reader.GetString(6))
             });
         }
 
@@ -93,7 +107,7 @@ public class PersonaRepository : IPersonaRepository
         await conn.OpenAsync();
 
         var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT Id, Nombre, FechaNacimiento FROM Personas WHERE Id = @id";
+        cmd.CommandText = "SELECT Id, Nombre, Apellido, TipoPersona, Telefono, Email,  FechaNacimiento FROM Personas WHERE Id = @id";
         cmd.Parameters.AddWithValue("@id", id);
 
         using var reader = await cmd.ExecuteReaderAsync();
@@ -103,7 +117,11 @@ public class PersonaRepository : IPersonaRepository
             {
                 Id = reader.GetInt32(0),
                 Nombre = reader.GetString(1),
-                FechaNacimiento = DateTime.Parse(reader.GetString(2))
+                Apellido = reader.GetString(2),
+                TipoPersona = (TipoPersona)reader.GetInt32(3),
+                Telefono = reader.GetString(4),
+                Email = reader.GetString(5),
+                FechaNacimiento = DateTime.Parse(reader.GetString(6))
             };
         }
 
@@ -120,13 +138,28 @@ public class PersonaRepository : IPersonaRepository
         await conn.OpenAsync();
 
         var cmd = conn.CreateCommand();
-        cmd.CommandText = "UPDATE Personas SET Nombre = @nombre, FechaNacimiento = @fecha WHERE Id = @id";
+        cmd.CommandText = @"
+        UPDATE Personas SET 
+            Nombre = @nombre, 
+            Apellido = @apellido, 
+            TipoPersona = @tipo, 
+            Telefono = @telefono, 
+            Email = @email, 
+            FechaNacimiento = @fecha 
+        WHERE Id = @id;
+    ";
+
         cmd.Parameters.AddWithValue("@nombre", persona.Nombre);
+        cmd.Parameters.AddWithValue("@apellido", persona.Apellido);
+        cmd.Parameters.AddWithValue("@tipo", (int)persona.TipoPersona);
+        cmd.Parameters.AddWithValue("@telefono", persona.Telefono);
+        cmd.Parameters.AddWithValue("@email", persona.Email);
         cmd.Parameters.AddWithValue("@fecha", persona.FechaNacimiento.ToString("yyyy-MM-dd"));
         cmd.Parameters.AddWithValue("@id", persona.Id);
 
         return await cmd.ExecuteNonQueryAsync() > 0;
     }
+
 
     
     // Métodos específicos de IPersonaRepository

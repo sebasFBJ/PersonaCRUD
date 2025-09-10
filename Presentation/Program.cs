@@ -111,6 +111,19 @@ while (true)
 
             Console.Write("Nuevo nombre: ");
             personaActualizar.Nombre = Console.ReadLine()!;
+            
+            Console.Write("Nuevo apellido: ");
+            personaActualizar.Apellido = Console.ReadLine();
+            
+            Console.Write("Nuevo tipo persona (1) Cliente , (2) Empleado, (3) Administrador");
+            personaActualizar.TipoPersona = int.Parse(Console.ReadLine()!);
+            
+            Console.Write("Nuevo telefono: ");
+            personaActualizar.Telefono = Console.ReadLine();
+            
+            Console.Write("Nuevo email: ");
+            personaActualizar.Email = Console.ReadLine();
+            
             Console.Write("Nueva fecha nacimiento (yyyy-MM-dd): ");
             personaActualizar.FechaNacimiento = DateTime.Parse(Console.ReadLine()!);
 
