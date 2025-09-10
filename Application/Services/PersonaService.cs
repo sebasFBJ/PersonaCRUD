@@ -1,69 +1,103 @@
+using System.ComponentModel.DataAnnotations;
+using PersonasCRUD.Application.DTOs;
+using PersonasCRUD.Application.Interfaces;
 using PersonasCRUD.Domain.Entities;
+using PersonasCRUD.Domain.Enums;
 using PersonasCRUD.Domain.Interfaces;
+
 
 namespace PersonasCRUD.Application.Services;
 
-public class PersonaService
+public class PersonaService : IPersonaService
 {
     private readonly IPersonaRepository _personaRepository;
 
-    // Inyectamos la dependencia del repositorio (no creamos el repo aquí).
+    /**
+     * Inyecion de dependencias
+     */
     public PersonaService(IPersonaRepository personaRepository)
     {
         _personaRepository = personaRepository;
     }
 
-    // Agregar persona con validaciones
-    public async Task<Persona> CrearPersonaAsync(string nombre, DateTime fechaNacimiento)
+    /**
+     * Metodo que crea una nueva persona en la base de datos
+     */
+    public async Task<PersonaDto> CrearPersonaAsync(PersonaDto dto)
     {
-        if (string.IsNullOrWhiteSpace(nombre))
-            throw new ArgumentException("El nombre no puede estar vacío.");
+        ValidarDto(dto);
+        
+        var persona = PersonaMapper.ToEntity(dto);
 
-        if (fechaNacimiento > DateTime.Today)
-            throw new ArgumentException("La fecha de nacimiento no puede ser futura.");
-
-        var persona = new Persona
-        {
-            Nombre = nombre,
-            FechaNacimiento = fechaNacimiento
-        };
-
-        return await _personaRepository.AddAsync(persona);
+        return PersonaMapper.ToDto(await _personaRepository.AddAsync(persona));
     }
 
-    // Listar todas las personas
-    public async Task<IEnumerable<Persona>> ObtenerTodasAsync()
+    /**
+     * Obtener todas las personas de la base de datos
+     */
+    public async Task<IEnumerable<PersonaDto>> ObtenerTodasAsync()
     {
-        return await _personaRepository.GetAllAsync();
+        return PersonaMapper.ToDtoList(await _personaRepository.GetAllAsync());
     }
 
-    // Buscar por ID
-    public async Task<Persona?> BuscarPorIdAsync(int id)
+    /**
+     * Buscar persona por ID
+     */   
+    public async Task<PersonaDto?> BuscarPorIdAsync(int id)
     {
-        return await _personaRepository.GetByIdAsync(id);
+        return PersonaMapper.ToDto(await _personaRepository.GetByIdAsync(id));
     }
 
-    // Actualizar persona
-    public async Task<bool> ActualizarPersonaAsync(Persona persona)
+    /**
+     * Actualizar persona
+     */  
+    public async Task<bool> ActualizarPersonaAsync(int id, PersonaDto dto)
     {
-        return await _personaRepository.UpdateAsync(persona);
+        ValidarDto(dto);
+
+        var perona = PersonaMapper.ToEntity(dto); 
+
+        return await _personaRepository.UpdateAsync(perona);
     }
 
-    // Eliminar persona
+    /**
+     * Eliminar persona
+     */ 
     public async Task<bool> EliminarPersonaAsync(int id)
     {
         return await _personaRepository.DeleteAsync(id);
     }
 
-    // Buscar por nombre
-    public async Task<IEnumerable<Persona>> BuscarPorNombreAsync(string nombre)
+    /**
+     * Buscar persona por nombre
+     */
+    public async Task<IEnumerable<PersonaDto>> BuscarPorNombreAsync(string nombre)
     {
-        return await _personaRepository.SearchByNameAsync(nombre);
+        return PersonaMapper.ToDtoList(await _personaRepository.SearchByNameAsync(nombre));
     }
 
-    // Buscar por rango de edad
-    public async Task<IEnumerable<Persona>> BuscarPorRangoEdadAsync(int min, int max)
+    /**
+     * Buscar persona por rango de edad
+     */
+    public async Task<IEnumerable<PersonaDto>> BuscarPorRangoEdadAsync(int edadMin, int edadMax)
     {
-        return await _personaRepository.GetByAgeRangeAsync(min, max);
+        return PersonaMapper.ToDtoList(await _personaRepository.GetByAgeRangeAsync(edadMin, edadMax));;
+    }
+
+    // 🔍 Validación manual del DTO
+    private void ValidarDto(PersonaDto dto)
+    {
+        var context = new ValidationContext(dto);
+        var results = new List<ValidationResult>();
+        bool isValid = Validator.TryValidateObject(dto, context, results, true);
+
+        if (!isValid)
+        {
+            var errores = string.Join("; ", results.Select(r => r.ErrorMessage));
+            throw new ValidationException($"Errores de validación: {errores}");
+        }
+
+        if (dto.FechaNacimiento > DateTime.Today)
+            throw new ArgumentException("La fecha de nacimiento no puede ser futura.");
     }
 }

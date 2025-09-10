@@ -2,7 +2,7 @@
 using PersonasCRUD.Application.Services;
 using PersonasCRUD.Infrastructure.Persistence;
 using PersonasCRUD.Domain.Interfaces;              // <-- agrega este
-
+using PersonasCRUD.Application.DTOs;
 
 // 1. Configurar DI (Dependency Injection)
 var services = new ServiceCollection();
@@ -44,16 +44,49 @@ while (true)
         case "1":
             Console.Write("Nombre: ");
             var nombre = Console.ReadLine()!;
+            
+            Console.Write("Apellido: ");
+            var apellido = Console.ReadLine();
+
+            Console.Write("1) Cliente , 2) Empleado, 3) Administrador");
+            int tipoPersona = int.Parse(Console.ReadLine()!);
+            
+            Console.Write("Telefono");
+            var telefono = Console.ReadLine();
+            
+            Console.Write("Email");
+            var email = Console.ReadLine();
+            
             Console.Write("Fecha de nacimiento (yyyy-MM-dd): ");
             var fecha = DateTime.Parse(Console.ReadLine()!);
-            var nuevaPersona = await personaService.CrearPersonaAsync(nombre, fecha);
-            Console.WriteLine($"✔ Persona creada con Id {nuevaPersona.Id}");
+
+            var dto = new PersonaDto
+            {
+                Nombre = nombre,
+                Apellido = apellido,
+                TipoPersona = tipoPersona,
+                Telefono = telefono,
+                Email = email,
+                FechaNacimiento = fecha
+            };
+            
+            try
+            {
+                var nuevaPersona = await personaService.CrearPersonaAsync(dto);
+                Console.WriteLine($"✔ Persona creada con Id {nuevaPersona.Id}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
             break;
 
         case "2":
             var personas = await personaService.ObtenerTodasAsync();
             foreach (var p in personas)
-                Console.WriteLine($"{p.Id} - {p.Nombre} ({p.FechaNacimiento:yyyy-MM-dd}) Edad: {p.Edad}");
+                Console.WriteLine($"{p.Id} - {p.Nombre} ({p.FechaNacimiento:yyyy-MM-dd}) Telefono: {p.Telefono}");
             break;
 
         case "3":
@@ -61,7 +94,7 @@ while (true)
             var idBuscar = int.Parse(Console.ReadLine()!);
             var persona = await personaService.BuscarPorIdAsync(idBuscar);
             if (persona != null)
-                Console.WriteLine($"{persona.Id} - {persona.Nombre} ({persona.Edad} años)");
+                Console.WriteLine($"{persona.Id} - {persona.Nombre} ({persona.FechaNacimiento} )");
             else
                 Console.WriteLine("❌ Persona no encontrada");
             break;
@@ -81,7 +114,7 @@ while (true)
             Console.Write("Nueva fecha nacimiento (yyyy-MM-dd): ");
             personaActualizar.FechaNacimiento = DateTime.Parse(Console.ReadLine()!);
 
-            if (await personaService.ActualizarPersonaAsync(personaActualizar))
+            if (await personaService.ActualizarPersonaAsync( idActualizar,personaActualizar))
                 Console.WriteLine("✔ Persona actualizada");
             else
                 Console.WriteLine("❌ Error al actualizar");

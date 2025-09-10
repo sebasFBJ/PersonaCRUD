@@ -13,8 +13,12 @@ public static class DatabaseInitializer
         cmd.CommandText = @"
             CREATE TABLE IF NOT EXISTS Personas (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Nombre TEXT NOT NULL,
-                FechaNacimiento TEXT NOT NULL
+                Nombre VARCHAR NOT NULL,
+                Apellido VARCHAR NOT NULL,
+                TipoPersona INTEGER NOT NULL,
+                Telefono VARCHAR NOT NULL,
+                Email VARCHAR NOT NULL,
+                FechaNacimiento DATE NOT NULL
             );
         ";
         cmd.ExecuteNonQuery();

@@ -9,11 +9,17 @@ public class PersonaRepository : IPersonaRepository
 {
     private readonly SqliteConnectionFactory _factory;
 
+    /**
+     * INYECCION DE DEPENDENCIAS EN EL CONSTRUCTOR
+     */
     public PersonaRepository(SqliteConnectionFactory factory)
     {
         _factory = factory;
     }
 
+    /**
+     * METODO QUE AGREGA UNA PERSONA A LA BASE DE DATOS
+     */
     public async Task<Persona> AddAsync(Persona persona)
     {
         using var conn = _factory.CreateConnection();
@@ -33,6 +39,10 @@ public class PersonaRepository : IPersonaRepository
         return persona;
     }
 
+    
+    /**
+     * METODO QUE ELIMINA UNA PERSONA DE LA BASE DE DATOS
+     */
     public async Task<bool> DeleteAsync(int id)
     {
         using var conn = _factory.CreateConnection();
@@ -45,6 +55,10 @@ public class PersonaRepository : IPersonaRepository
         return await cmd.ExecuteNonQueryAsync() > 0;
     }
 
+    
+    /**
+     * METODO QUE LISTA TODAS LAS PERSONAS DE LA BASE DE DATOS
+     */
     public async Task<IEnumerable<Persona>> GetAllAsync()
     {
         var personas = new List<Persona>();
@@ -69,6 +83,10 @@ public class PersonaRepository : IPersonaRepository
         return personas;
     }
 
+    
+    /**
+     * METODO QUE BUSCA UNA PERSONA POR ID
+     */
     public async Task<Persona?> GetByIdAsync(int id)
     {
         using var conn = _factory.CreateConnection();
@@ -92,6 +110,10 @@ public class PersonaRepository : IPersonaRepository
         return null;
     }
 
+    
+    /**
+     * METODO QUE ACTUALIZA UNA PERSONA EN LA BASE DE DATOS
+     */   
     public async Task<bool> UpdateAsync(Persona persona)
     {
         using var conn = _factory.CreateConnection();
@@ -106,19 +128,32 @@ public class PersonaRepository : IPersonaRepository
         return await cmd.ExecuteNonQueryAsync() > 0;
     }
 
+    
     // Métodos específicos de IPersonaRepository
+    
+    /**
+     * METODO QUE BUSCA UNA PERSONA POR RANGO DE EDAD
+     */   
     public async Task<IEnumerable<Persona>> GetByAgeRangeAsync(int minAge, int maxAge)
     {
         var personas = await GetAllAsync();
         return personas.Where(p => p.Edad >= minAge && p.Edad <= maxAge);
     }
-
+    
+    
+    /**
+     * METODO QUE BUSCA UNA PERSONA POR NOMBRE (PARCIAL)
+     */  
     public async Task<IEnumerable<Persona>> SearchByNameAsync(string name)
     {
         var personas = await GetAllAsync();
         return personas.Where(p => p.Nombre.Contains(name, StringComparison.OrdinalIgnoreCase));
     }
 
+    
+    /**
+     * METODO QUE BUSCA UNA PERSONA POR NOMBRE (EXACTO)
+     */ 
     public async Task<Persona?> GetByNombreAsync(string nombre)
     {
         var personas = await GetAllAsync();
